@@ -21,12 +21,11 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.std_logic_unsigned.ALL;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -56,17 +55,17 @@ begin
         
         case(i_op) is
             when "000" =>
-                sum <= ('0' & i_A) + ('0' & i_B);
-                result <= i_A + i_B;
+                sum <= std_logic_vector(('0' & unsigned(i_A)) + ('0' & unsigned(i_B)));
+                result <= std_logic_vector(unsigned(i_A) + unsigned(i_B));
             when "001" =>
-                result <= i_A - i_B;
-                sum <= ('0' & i_A) - ('0' & i_B);
+                result <= std_logic_vector(unsigned(i_A) - unsigned(i_B));
+                sum <= std_logic_vector(('0' & unsigned(i_A)) - ('0' & unsigned(i_B)));
             when "010" =>
                 result <= i_A and i_B;
             when "011" =>
                 result <= i_A or i_B;
             when others =>
-                result <= i_A + i_B;
+                result <= std_logic_vector(unsigned(i_A) + unsigned(i_B));
                 
         end case;
     end process;
