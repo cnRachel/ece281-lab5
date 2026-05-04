@@ -21,6 +21,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.std_logic_unsigned.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -41,7 +43,51 @@ end ALU;
 
 architecture Behavioral of ALU is
 
+    signal result : std_logic_vector(7 downto 0);
+    signal sum    : std_logic_vector(8 downto 0);
+    signal N,Z,C,V, add_ov, sub_ov: std_logic;
+
 begin
 
+    process(i_A, i_B, i_op)
+    begin
+        
+        sum <= "000000000";
+        
+        case(i_op) is
+            when "000" =>
+                sum <= ('0' & i_A) + ('0' & i_B);
+                result <= i_A + i_B;
+            when "001" =>
+                result <= i_A - i_B;
+                sum <= ('0' & i_A) - ('0' & i_B);
+            when "010" =>
+                result <= i_A and i_B;
+            when "011" =>
+                result <= i_A or i_B;
+            when others =>
+                result <= i_A + i_B;
+                
+        end case;
+    end process;
+        o_result <= result;
+        
+        N <= result(7);
+        Z <= '1' when result = x"00" else '0';
+        
+        add_ov <= (i_A(7)and i_B(7) and (not result(7))) or ((not i_A(7)) and (not i_B(7)) and result(7)); 
+        sub_ov <= (i_A(7) and (not i_B(7)) and (not result(7))) or ((not i_A(7))and i_B(7) and result(7));
+        
+        with i_op select
+            V <= add_ov when "000",
+                 sub_ov when "001",
+                 '0' when others;
+        with i_op select
+            C <= sum(8) when "000",
+                 not sum(8) when "001",
+                 '0' when others;
+        
+        
+        o_flags <= N & Z & C & V;
 
 end Behavioral;
