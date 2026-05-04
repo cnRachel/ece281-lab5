@@ -140,9 +140,7 @@ architecture top_basys3_arch of top_basys3 is
     signal w_tdm_sel    : std_logic_vector(3 downto 0);
     signal w_seg_dec    : std_logic_vector(6 downto 0);
     
-    signal w_display_latched : std_logic_vector(7 downto 0) := (others => '0');
-    -- frozen value shown during LOAD_A and LOAD_B state
-    
+   
 begin
 	-- PORT MAPS ----------------------------------------
 
@@ -211,26 +209,27 @@ begin
     begin
         if rising_edge(clk) then
             if btnU = '1' then
-                w_reg_A  <= (others => '0');
-                w_reg_B  <= (others => '0');
-                w_reg_op <= (others => '0');
-                w_display_latched <= (others => '0');
+                w_reg_A   <= (others => '0');
+                w_reg_B   <= (others => '0');
+                w_reg_op  <= (others => '0');
+                w_display <= (others => '0');
 
             elsif w_adv = '1' then
                 case w_cycle is
                     when "0001" =>                      -- CLEAR: latch A
                         w_reg_A <= sw;
-                        w_display_latched <= sw;
+                        w_display <= sw;
  
                     when "0010" =>                      -- LOAD_A: latch B
                         w_reg_B <= sw;
-                        w_display_latched <= sw;
+                        w_display <= sw;
  
                     when "0100" =>                      -- LOAD_B: latch opcode only
                         w_reg_op <= sw(2 downto 0);
+                        w_display <= w_result;
  
-                    when "1000" =>                      -- SHOW: going back to CLEAR
-                        w_display_latched <= (others => '0');
+                    when "1000" =>                      -- EXECUTE: going back to CLEAR
+                        w_display <= (others => '0');
  
                     when others => null;
                 end case;
@@ -238,9 +237,7 @@ begin
         end if;
     end process reg_proc;
 	-- CONCURRENT STATEMENTS ----------------------------
-	
-	w_display <= w_result when w_cycle(3) = '1' else w_display_latched;
-                 
+	                 
     seg <= "0111111" when (w_tdm_sel = "0111" and w_sign = '1') else
            "1111111" when (w_tdm_sel = "0111" and w_sign = '0') else
            w_seg_dec;
